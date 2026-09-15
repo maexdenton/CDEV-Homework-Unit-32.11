@@ -1,3 +1,5 @@
+using WebApplication1.Middleware;
+
 namespace WebApplication1
 {
     public class Program
@@ -19,12 +21,28 @@ namespace WebApplication1
                 app.UseHsts();
             }
 
+            // Подключаем наш кастомный Middleware (ставим его в начало, чтобы оно замеряло время работы всех последующих компонентов)
+            app.UseLoggingMiddleware();
+
+            // Перенаправляет HTTP-запросы на защищенное HTTPS-соединени
             app.UseHttpsRedirection();
+
+            // Middleware для обслуживания статических файлов
+            // из каталога wwwroot: CSS, JavaScript, изображения и шрифты
+            app.UseStaticFiles();
+
+            // Middleware маршрутизации.
+            // Определяет, какой обработчик должен обслужить входящий запрос
             app.UseRouting();
 
+            // Middleware авторизации.
+            // Проверяет, имеет ли пользователь права на доступ к ресурсу
             app.UseAuthorization();
 
+            // Регистрация маршрута для статических ресурсов приложения
             app.MapStaticAssets();
+
+            // Middleware, связывающее контроллеры и маршруты
             app.MapControllerRoute(
                 name: "default",
                 pattern: "{controller=Home}/{action=Index}/{id?}")
