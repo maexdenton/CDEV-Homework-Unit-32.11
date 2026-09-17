@@ -1,5 +1,5 @@
-using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
+using Microsoft.AspNetCore.Mvc;
 using WebApplication1.Models;
 
 namespace WebApplication1.Controllers
@@ -7,9 +7,9 @@ namespace WebApplication1.Controllers
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
-        private readonly IConfiguration _configuration; // Добавляем поле конфигурации
+        private readonly IConfiguration _configuration;
 
-        // Внедряем IConfiguration через конструктор
+        // Внедряем все зависимости в едином конструкторе
         public HomeController(ILogger<HomeController> logger, IConfiguration configuration)
         {
             _logger = logger;
@@ -32,8 +32,6 @@ namespace WebApplication1.Controllers
         {
             // Получаем имя из appsettings.json
             string appName = _configuration["AppName"] ?? "Неизвестное приложение";
-
-            // Передаем имя в View через ViewBag (или ViewData)
             ViewBag.ApplicationName = appName;
 
             return View();

@@ -26,10 +26,24 @@
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
                         </li>
-                        <!-- Добавляем ссылку для страницы About в навигационное меню -->
+
+                        <!-- Добавляем ссылку для страницы "Пользователи" в навигационное меню -->
                         <li class="nav-item">
-                            <a class="nav-link text-dark" href="/about">О нас</a>
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Users" asp-action="Index">Пользователи</a>
                         </li>
+                        <!-- Добавляем ссылку для страницы "Логи" в навигационное меню -->
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Logs" asp-action="Index">Логи</a>
+                        </li>
+                        <!-- Добавляем ссылку для страницы "Отзывы" в навигационное меню --> 
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Feedback" asp-action="Index">Отзывы</a>
+                        </li>
+                        <!-- Добавляем ссылку для страницы "О нас" в навигационное меню -->
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="About">О нас</a>
+                        </li>
+
                     </ul>
                 </div>
             </div>
