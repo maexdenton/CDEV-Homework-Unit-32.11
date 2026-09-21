@@ -16,22 +16,18 @@ namespace WebApplication1.Controllers
             _configuration = configuration;
         }
 
+        // Главная страница сайта
         public IActionResult Index()
         {
             return View();
         }
 
-        public IActionResult Privacy()
-        {
-            return View();
-        }
-
-        // Создаем Action для страницы About с явным URL /about
+        // Страница "О нас" с явным URL /about
         [Route("about")]
         public IActionResult About()
         {
             // Получаем имя из appsettings.json
-            string appName = _configuration["AppName"] ?? "Неизвестное приложение";
+            string appName = _configuration["AppName"] ?? "Блог-платформа";
             ViewBag.ApplicationName = appName;
 
             return View();

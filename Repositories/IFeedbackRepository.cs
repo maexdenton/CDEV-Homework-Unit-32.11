@@ -1,4 +1,4 @@
-﻿using WebApplication1.Models;
+﻿using WebApplication1.Models.DB;
 
 namespace WebApplication1.Repositories
 {
