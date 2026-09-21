@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics;
-using System.Text;
 using WebApplication1.Models.DB;
 using WebApplication1.Repositories;
 
@@ -9,25 +8,22 @@ namespace WebApplication1.Middleware
     {
         private readonly RequestDelegate _next;
         private readonly IWebHostEnvironment _env;
+        private readonly ILogger<LoggingMiddleware> _logger; // Внедряем ILogger
 
-        // Семафор для потокобезопасной записи в файл
-        // private static readonly SemaphoreSlim _fileLock = new SemaphoreSlim(1, 1);
-        
-        // Объект блокировки для корректной смены цветов в консоли между параллельными потоками
-        private static readonly object _consoleLock = new object();
-
-        public LoggingMiddleware(RequestDelegate next, IWebHostEnvironment env)
+        public LoggingMiddleware(
+            RequestDelegate next,
+            IWebHostEnvironment env,
+            ILogger<LoggingMiddleware> logger)
         {
             _next = next;
             _env = env;
+            _logger = logger;
         }
 
-        // Внедряем ILogRepository в InvokeAsync
         public async Task InvokeAsync(HttpContext context, ILogRepository logRepository)
         {
             var watch = Stopwatch.StartNew();
 
-            // Передаем запрос дальше по конвейеру
             await _next(context);
 
             watch.Stop();
@@ -52,115 +48,38 @@ namespace WebApplication1.Middleware
                 ClientIp = clientIp
             };
 
-            // Вывод в консоль (красивый)
-            WriteColoredConsoleLog(now.ToString("yyyy-MM-dd HH:mm:ss.fff"), environment, clientIp, method, fullPath, statusCode, elapsedMs);
+            // Логирование через ILogger (структурированное логирование)
+            // Определяем уровень лога в зависимости от статуса ответа
+            LogLevel logLevel = statusCode switch
+            {
+                >= 500 => LogLevel.Error,       // Ошибки сервера (5xx)
+                >= 400 => LogLevel.Warning,     // Ошибки клиента (4xx)
+                _ => LogLevel.Information       // Успешные запросы (2xx, 3xx)
+            };
 
-            // Безопасная фоновая запись в файл (больше не пишем логи в файл, т.к. у нас теперь есть БД для этого)
-            // string plainLogMessage = $"[{now:yyyy-MM-dd HH:mm:ss.fff}] [{environment}] [IP: {clientIp}] {method} {fullPath} - Статус: {statusCode} ({elapsedMs} мс)";
-            // await WriteToFileAsync(plainLogMessage);
+            // Шаблон со структурированными параметрами {Environment}, {ClientIp}, {Method} и т.д.
+            _logger.Log(
+                logLevel,
+                "[{Environment}] [IP: {ClientIp}] {Method} {Path} - Статус: {StatusCode} ({ElapsedMs} мс)",
+                environment,
+                clientIp,
+                method,
+                fullPath,
+                statusCode,
+                elapsedMs
+            );
 
-            // Сохраняем лог в БД
+            // Сохранение лога в БД
             try
             {
                 await logRepository.AddLogAsync(logEntity);
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"[ОШИБКА ЗАПИСИ ЛОГА В БД]: {ex.Message}");
+                // Ошибки записи в БД также логируем через ILogger
+                _logger.LogError(ex, "Ошибка при сохранении HTTP-лога в базу данных.");
             }
         }
-
-        // Метод для потокобезопасного цветного вывода в консоль
-        private void WriteColoredConsoleLog(
-            string timestamp,
-            string environment,
-            string clientIp,
-            string method,
-            string path,
-            int statusCode,
-            long elapsedMs)
-        {
-            lock (_consoleLock)  // Блокировка гарантирует, что цвета не перемешаются при параллельных запросах
-            {
-                // Время - Темно-серый
-                Console.ForegroundColor = ConsoleColor.DarkGray;
-                Console.Write($"[{timestamp}] ");
-
-                // Среда - Голубой
-                Console.ForegroundColor = ConsoleColor.DarkCyan;
-                Console.Write($"[{environment}] ");
-
-                // IP - Темно-желтый
-                Console.ForegroundColor = ConsoleColor.DarkYellow;
-                Console.Write($"[IP: {clientIp}] ");
-
-                // HTTP Метод - Цвет зависит от типа запроса
-                Console.ForegroundColor = method switch
-                {
-                    "GET" => ConsoleColor.Cyan,
-                    "POST" => ConsoleColor.Yellow,
-                    "PUT" => ConsoleColor.Magenta,
-                    "DELETE" => ConsoleColor.Red,
-                    _ => ConsoleColor.White
-                };
-                Console.Write($"{method} ");
-
-                // Путь - Белый
-                Console.ForegroundColor = ConsoleColor.White;
-                Console.Write($"{path} - ");
-
-                // Статус ответа - подсветка успехов и ошибок
-                Console.ForegroundColor = statusCode switch
-                {
-                    >= 200 and < 300 => ConsoleColor.Green,    // Успех (зеленый)
-                    >= 300 and < 400 => ConsoleColor.Cyan,     // Перенаправление (голубой)
-                    >= 400 and < 500 => ConsoleColor.Yellow,   // Ошибка клиента (желтый)
-                    >= 500 => ConsoleColor.Red,                // Ошибка сервера (красный)
-                    _ => ConsoleColor.Gray
-                };
-                Console.Write($"Статус: {statusCode} ");
-
-                // Время отклика - Темно-серый
-                Console.ForegroundColor = ConsoleColor.DarkGray;
-                Console.WriteLine($"({elapsedMs} мс)");
-
-                // Сброс цвета консоли к системному по умолчанию
-                Console.ResetColor();
-            }
-        }
-
-        /*
-        // Асинхронная запись лога в файл
-        private async Task WriteToFileAsync(string logMessage)
-        {
-            try
-            {
-                string logsFolderPath = Path.Combine(_env.ContentRootPath, "Logs");
-
-                if (!Directory.Exists(logsFolderPath))
-                {
-                    Directory.CreateDirectory(logsFolderPath);
-                }
-
-                string fileName = $"log-{DateTime.Now:yyyy-MM-dd}.txt";
-                string filePath = Path.Combine(logsFolderPath, fileName);
-
-                await _fileLock.WaitAsync();
-                try
-                {
-                    await File.AppendAllTextAsync(filePath, logMessage + Environment.NewLine, Encoding.UTF8);
-                }
-                finally
-                {
-                    _fileLock.Release();
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"[ОШИБКА ЗАПИСИ В ФАЙЛ]: {ex.Message}");
-            }
-        }
-        */
     }
 
     // Метод расширения для удобного подключения в Program.cs

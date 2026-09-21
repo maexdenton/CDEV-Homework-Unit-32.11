@@ -1,0 +1,68 @@
+﻿@model IEnumerable<WebApplication1.Models.DB.RequestLog>
+
+@{
+    ViewData["Title"] = "История запросов";
+}
+
+<div class="container my-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2>История HTTP-запросов</h2>
+        <a href="/logs" class="btn btn-outline-primary btn-sm">Обновить</a>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-striped table-hover align-middle">
+            <thead class="table-dark">
+                <tr>
+                    <th>Время</th>
+                    <th>Env</th>
+                    <th>IP</th>
+                    <th>Метод</th>
+                    <th>Путь</th>
+                    <th>Статус</th>
+                    <th>Время отклика</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var log in Model)
+                {
+                    <tr>
+                        <td class="text-nowrap">
+                            <small class="text-muted">@log.Timestamp.ToString("yyyy-MM-dd HH:mm:ss.fff")</small>
+                        </td>
+                        <td><span class="badge bg-secondary">@log.Environment</span></td>
+                        <td><small>@log.ClientIp</small></td>
+                        <td>
+                            @{
+                                var methodBadge = log.Method switch
+                                {
+                                    "GET" => "bg-info text-dark",
+                                    "POST" => "bg-warning text-dark",
+                                    "PUT" => "bg-primary",
+                                    "DELETE" => "bg-danger",
+                                    _ => "bg-secondary"
+                                };
+                            }
+                            <span class="badge @methodBadge">@log.Method</span>
+                        </td>
+                        <td class="text-break"><code>@log.Path</code></td>
+                        <td>
+                            @{
+                                var statusBadge = log.StatusCode switch
+                                {
+                                    >= 200 and < 300 => "bg-success",
+                                    >= 300 and < 400 => "bg-info text-dark",
+                                    >= 400 and < 500 => "bg-warning text-dark",
+                                    >= 500 => "bg-danger",
+                                    _ => "bg-secondary"
+                                };
+                            }
+                            <span class="badge @statusBadge">@log.StatusCode</span>
+                        </td>
+                        <td><small class="fw-bold">@log.ElapsedMs мс</small></td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

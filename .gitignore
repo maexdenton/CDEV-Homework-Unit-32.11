@@ -31,7 +31,10 @@ bld/
 [Oo]bj/
 [Oo]ut/
 [Ll]og/
+# Игнорируем логи, но сохраняем представления Razor (иначе Views/Logs/Index.cshtml попадет в теже исключения)
 [Ll]ogs/
+!Views/Logs/
+!Views/Logs/**
 
 # Visual Studio 2015/2017 cache/options directory
 .vs/
