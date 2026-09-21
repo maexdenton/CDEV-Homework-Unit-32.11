@@ -6,7 +6,7 @@ using BlogPlatform.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Подключение DbContext
+// Подключение DbContext 
 builder.Services.AddDbContext<BlogDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
