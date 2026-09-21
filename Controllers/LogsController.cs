@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Hosting; // Требуется для расширения .IsDevelopment()
-using WebApplication1.Repositories;
+using BlogPlatform.Repositories;
 
-namespace WebApplication1.Controllers
+namespace BlogPlatform.Controllers
 {
     public class LogsController : Controller
     {

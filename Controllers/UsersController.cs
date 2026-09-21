@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using WebApplication1.Models.DB;
-using WebApplication1.Repositories;
+using BlogPlatform.Models.DB;
+using BlogPlatform.Repositories;
 
-namespace WebApplication1.Controllers
+namespace BlogPlatform.Controllers
 {
     public class UsersController : Controller
     {

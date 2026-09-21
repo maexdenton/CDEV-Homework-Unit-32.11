@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace WebApplication1.Models.DB
+namespace BlogPlatform.Models.DB
 {
     [Table("UserPosts")]
     public class UserPost

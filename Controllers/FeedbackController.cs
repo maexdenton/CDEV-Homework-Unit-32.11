@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using WebApplication1.Models.DB;
-using WebApplication1.Services;
+using BlogPlatform.Models.DB;
+using BlogPlatform.Services;
 
-namespace WebApplication1.Controllers
+namespace BlogPlatform.Controllers
 {
     public class FeedbackController : Controller
     {

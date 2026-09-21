@@ -1,8 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using WebApplication1.Data;
-using WebApplication1.Models.DB;
+using BlogPlatform.Data;
+using BlogPlatform.Models.DB;
 
-namespace WebApplication1.Repositories
+namespace BlogPlatform.Repositories
 {
     public class UserPostRepository : IUserPostRepository
     {

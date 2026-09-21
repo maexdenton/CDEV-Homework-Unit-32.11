@@ -1,6 +1,6 @@
-﻿using WebApplication1.Models.DB;
+﻿using BlogPlatform.Models.DB;
 
-namespace WebApplication1.Repositories
+namespace BlogPlatform.Repositories
 {
     public interface IFeedbackRepository
     {
