@@ -1,8 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using WebApplication1.Models;
-using WebApplication1.Models.DB;
+using BlogPlatform.Models.DB;
 
-namespace WebApplication1.Data
+namespace BlogPlatform.Data
 {
     public class BlogDbContext : DbContext
     {

@@ -1,49 +1,50 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using WebApplication1.Models;
-using WebApplication1.Repositories;
+using BlogPlatform.Models.DB;
+using BlogPlatform.Services;
 
-namespace WebApplication1.Controllers
+namespace BlogPlatform.Controllers
 {
     public class FeedbackController : Controller
     {
-        private readonly IFeedbackRepository _feedbackRepository;
+        private readonly IFeedbackService _feedbackService;
 
-        public FeedbackController(IFeedbackRepository feedbackRepository)
+        // Внедряем сервис бизнес-логики
+        public FeedbackController(IFeedbackService feedbackService)
         {
-            _feedbackRepository = feedbackRepository;
+            _feedbackService = feedbackService;
         }
 
-        // GET: /Feedback — Отображение страницы с отзывами
+        // GET: /Feedback
         [HttpGet]
         public async Task<IActionResult> Index()
         {
-            var feedbacks = await _feedbackRepository.GetAllAsync();
+            var feedbacks = await _feedbackService.GetFeedbacksAsync();
             return View(feedbacks);
         }
 
-        // POST: /Feedback/Add - AJAX-обработчик для добавления отзыва
+        // POST: /Feedback/Add (AJAX)
         [HttpPost]
-        public async Task<IActionResult> Add([FromBody] Feedback feedback)
+        public async Task<IActionResult> Add([FromBody] Feedback feedbackDto)
         {
-            if (!ModelState.IsValid)
+            try
             {
-                return BadRequest(new { success = false, message = "Заполните все поля корректно." });
-            }
+                var createdFeedback = await _feedbackService.CreateFeedbackAsync(feedbackDto.FromUser, feedbackDto.Text);
 
-            feedback.CreatedAt = DateTime.UtcNow;
-            await _feedbackRepository.AddAsync(feedback);
-
-            // Возвращаем успех и данные созданного отзыва в формате JSON
-            return Json(new
-            {
-                success = true,
-                feedback = new
+                return Json(new
                 {
-                    fromUser = feedback.FromUser,
-                    text = feedback.Text,
-                    createdAt = feedback.CreatedAt.ToLocalTime().ToString("dd.MM.yyyy HH:mm:ss")
-                }
-            });
+                    success = true,
+                    feedback = new
+                    {
+                        fromUser = createdFeedback.FromUser,
+                        text = createdFeedback.Text,
+                        createdAt = createdFeedback.CreatedAt.ToLocalTime().ToString("dd.MM.yyyy HH:mm:ss")
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { success = false, message = ex.Message });
+            }
         }
     }
 }

@@ -1,8 +1,8 @@
 ﻿using System.Diagnostics;
-using WebApplication1.Models.DB;
-using WebApplication1.Repositories;
+using BlogPlatform.Models.DB;
+using BlogPlatform.Repositories;
 
-namespace WebApplication1.Middleware
+namespace BlogPlatform.Middleware
 {
     public class LoggingMiddleware
     {

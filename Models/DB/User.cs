@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace WebApplication1.Models.DB
+namespace BlogPlatform.Models.DB
 {
     [Table("Users")] // Явное имя таблицы в MS SQL Server
     public class User

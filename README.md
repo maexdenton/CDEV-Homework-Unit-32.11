@@ -1,50 +1,51 @@
-# WebApplication1
-Проект веб-приложения на **ASP.NET Core MVC**, демонстрирующий работу с конфигурациями сред, кастомным Middleware, Repository, ORM Entity Framework Core и MS SQL Server, и гибкой системой логирования.
+# BlogPlatform (ASP.NET Core MVC)
 
-## 🛠 Технологический стек
-- **Платформа:** .NET 8 / C#
-- **Фреймворк:** ASP.NET Core MVC
-- **ORM:** Entity Framework Core (SQL Server Provider)
-- **База данных:** Microsoft SQL Server Express
-- **Фронтенд:** Bootstrap 5, JavaScript (Fetch API / AJAX)
+Учебный проект веб-приложения на **ASP.NET Core MVC** с использованием **Entity Framework Core**, разработанный в рамках модуля 32.11.
 
-## ✨ Основные возможности
+## 🛠 Стек технологий
+- **.NET 8 / C#**
+- **ASP.NET Core MVC**
+- **Entity Framework Core 8** (MS SQL Server Express)
+- **Bootstrap 5 & JS (Fetch API / AJAX)**
 
-### 1. Архитектура и База Данных (`Models/DB`)
-- **`User`** - сущность пользователя/автора.
-- **`UserPost`** - посты с каскадной связью с автором (One-to-Many).
-- **`Feedback`** - отзывы пользователей/посетителей.
-- **`RequestLog`** - логи входящих HTTP-запросов.
-*Автоматическое развертывание БД и таблиц при старте приложения через `EnsureCreated()`.*
-> [!NOTE]
-> `EnsureCreated()` при отсутствии БД создает ее и таблицы на основе текущих моделей, без ручного запуска миграций. Подходит для быстрого старта и тестов, но не отслеживает последующие изменения моделей: существующую БД потребуется пересоздать или обновить отдельно.
+## 📌 Что реализовано в проекте
 
-### 2. Паттерн Репозиторий (`Repositories`)
-Слой данных полностью изолирован от контроллеров. Работа с базой происходит через интерфейсы:
-- `IUserRepository` - управление пользователями.
-- `IUserPostRepository` - управление постами.
-- `IFeedbackRepository` - обработка отзывов.
-- `ILogRepository` - сохранение и чтение истории запросов.
+### 1. Модели и Автоматизация Базы Данных (`Models/DB`)
+- Сущности: `User`, `UserPost` (связь 1-to-Many), `Feedback`, `RequestLog`.
+- **Автоматическое создание БД и миграции:** При старте приложения Entity Framework Core автоматически проверяет наличие MS SQL Server Express и создает базу данных (`BlogPlatformDb`) со всеми таблицами через `EnsureCreated()` / миграции — ручной прогон CLI-команд не требуется.
 
-### 3. Маршрутизация
-- **`/`** - Главная страница.
-- **`/Users`** - Список зарегистрированных авторов.
-- **`/Users/Register`** - Форма регистрации нового пользователя.
-- **`/Feedback`** - Форма отзывов с асинхронной **AJAX-отправкой (Fetch API)** без перезагрузки страницы.
-- **`/about`** - Информационная страница (считывает данные из `appsettings.json`).
-- **`/logs`** - Веб-интерфейс просмотра истории HTTP-запросов к системе.
+### 2. Архитектура (Repository + Service Layer)
+- **Слой репозиториев:** `UserRepository`, `UserPostRepository`, `FeedbackRepository`, `LogRepository`.
+- **Сервисный слой:** `FeedbackService` изолирует бизнес-логику от контроллеров (принцип "тонких" контроллеров).
 
-### 4. Кастомный `LoggingMiddleware`
-- Перехватывает 100% входящих запросов.
-- **Цветная консоль:** с дифференциацией по HTTP-методам (`GET`, `POST` и др.) и статус кодам (`200 OK`, `404`, `500`).
-- **Асинхронная запись в MS SQL Server:** фиксирует Timestamp, IP-адрес, QueryString, статус и время отклика (в мс).
-- **Очистка консоли:** скрытие служебного спама EF Core через `appsettings.Development.json`.
+### 3. Представления и Фронтенд
+- `/Users` — Просмотр авторов и регистрация нового пользователя.
+- `/Feedback` — Отправка отзывов через **AJAX (Fetch API)** без перезагрузки страницы (`wwwroot/js/feedback.js`).
+- `/about` — Страница "О нас".
+
+### 4. Кастомное логирование (`LoggingMiddleware`)
+- Перехват всех HTTP-запросов и сохранение в БД (`RequestLogs`).
+- Вывод через структурированный `ILogger`.
+- Фильтрация служебного спама EF Core в `appsettings.Development.json`.
+
+### 5. Работа с окружениями (`Development` / `Production`)
+- Страница логов `/logs` и кнопка в меню доступны **только в режиме `Development`** (в `Production` возвращает 404).
 
 ## 🚀 Запуск проекта
-1. Убедитесь, что запущен **MS SQL Server Express**.
+1. Убедитесь, что запущен локальный **MS SQL Server Express** (`.\SQLEXPRESS`). База данных развернется автоматически.
 2. Проверьте строку подключения в `appsettings.json`:
    ```json
    "ConnectionStrings": {
      "DefaultConnection": "Server=.\\SQLEXPRESS;Database=BlogPlatformDb;Trusted_Connection=True;TrustServerCertificate=True;"
    }
+   ```
 
+### Запуск в режиме разработки (Development):
+```bash
+dotnet run --environment Development
+```
+
+### Запуск в боевом режиме (Production):
+```bash
+dotnet run --environment Production
+```

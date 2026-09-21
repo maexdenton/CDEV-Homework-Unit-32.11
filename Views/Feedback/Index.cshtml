@@ -1,4 +1,4 @@
-﻿@model IEnumerable<WebApplication1.Models.Feedback>
+﻿@model IEnumerable<BlogPlatform.Models.DB.Feedback>
 
 @{
     ViewData["Title"] = "Отзывы";
@@ -10,7 +10,7 @@
     <!-- Форма для отправки отзыва -->
     <div class="card mb-4 shadow-sm">
         <div class="card-body">
-            <h5 class="card-title">Оставить отзыв</h5>
+            <h5 class="card-title mb-3">Оставить отзыв</h5>
             <form id="feedbackForm">
                 <div class="mb-3">
                     <label for="fromUser" class="form-label">Ваше имя</label>
@@ -33,7 +33,7 @@
     <div id="feedbackList">
         @foreach (var item in Model)
         {
-            <div class="card mb-3 border-left-primary">
+            <div class="card mb-3 feedback-card shadow-sm">
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center mb-2">
                         <h6 class="card-subtitle text-primary fw-bold">@item.FromUser</h6>
@@ -45,67 +45,3 @@
         }
     </div>
 </div>
-
-<!-- JavaScript для AJAX-отправки -->
-@section Scripts {
-    <script>
-        document.getElementById('feedbackForm').addEventListener('submit', async function (e) {
-            e.preventDefault(); // Предотвращаем стандартную отправку формы и перезагрузку страницы
-
-            const submitBtn = document.getElementById('submitBtn');
-            const fromUser = document.getElementById('fromUser').value.trim();
-            const text = document.getElementById('feedbackText').value.trim();
-
-            if (!fromUser || !text) return;
-
-            // Запрещаем повторные клики на время запроса
-            submitBtn.disabled = true;
-
-            try {
-                // Выполняем асинхронный HTTP POST-запрос на сервер
-                const response = await fetch('/Feedback/Add', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        fromUser: fromUser,
-                        text: text
-                    })
-                });
-
-                const result = await response.json();
-
-                if (result.success) {
-                    // Динамически создаем новый HTML-блок отзыва
-                    const feedbackList = document.getElementById('feedbackList');
-                    const newFeedbackCard = document.createElement('div');
-                    newFeedbackCard.className = 'card mb-3 border-left-primary';
-                    newFeedbackCard.innerHTML = `
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between align-items-center mb-2">
-                                <h6 class="card-subtitle text-primary fw-bold">${result.feedback.fromUser}</h6>
-                                <small class="text-muted">${result.feedback.createdAt}</small>
-                            </div>
-                            <p class="card-text mb-0">${result.feedback.text}</p>
-                        </div>
-                    `;
-
-                    // Вставляем новый отзыв в самый верх списка (без перезагрузки)
-                    feedbackList.insertBefore(newFeedbackCard, feedbackList.firstChild);
-
-                    // Очищаем поля формы
-                    document.getElementById('fromUser').value = '';
-                    document.getElementById('feedbackText').value = '';
-                } else {
-                    alert('Ошибка: ' + result.message);
-                }
-            } catch (error) {
-                console.error('Ошибка при отправке AJAX:', error);
-                alert('Произошла ошибка при отправке отзыва.');
-            } finally {
-                submitBtn.disabled = false;
-            }
-        });
-    </script>
-}
